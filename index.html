@@ -167,11 +167,14 @@ function flash(btn,key){ const o=btn.dataset.label||btn.textContent;
   setTimeout(()=>btn.textContent=o,1500); }
 function cp(btn){
   const txt=btn.parentElement.querySelector(".ptext").textContent;
+  // 同步的 execCommand 必须在点击手势内跑（异步 clipboard 失败后再兜底就晚了）；
+  // 先同步兜底，成功就好；不成功再试异步 clipboard API。
+  if(legacyCopy(txt)){ flash(btn,"copied"); return; }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(()=>flash(btn,"copied"),
-      ()=>flash(btn, legacyCopy(txt)?"copied":"copyfail"));
+      ()=>flash(btn,"copyfail"));
   } else {
-    flash(btn, legacyCopy(txt)?"copied":"copyfail");
+    flash(btn,"copyfail");
   }
 }
 function zoom(src){ document.getElementById("lightboxImg").src=src; document.getElementById("lightbox").style.display="flex"; }
